@@ -5,10 +5,13 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "GenericTeamAgentInterface.h"
+#include "Perception/AIPerceptionTypes.h"
+#include "AI/Types/DataTypes.h"
 #include "AI_Demo_AIControllerBase.generated.h"
 
 class UAISenseConfig;
 class UAIPerceptionComponent;
+
 
 UCLASS()
 class AI_DEMO_API AAI_Demo_AIControllerBase : public AAIController
@@ -27,22 +30,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	UAIPerceptionComponent* AIPerceptionComp = nullptr;
 
-#pragma endregion
-
-
-	void OnPossess(APawn* InPawn) override;
-
-private:
 	// AI Perception Component Setup
 	FORCEINLINE void SetupPreceptionComponent();
 	FORCEINLINE void SetupPerceptionSenses();
 
-	UFUNCTION()
-	void OnPerceptionUpdated(const TArray<AActor*> &UpdatedActors);
-	void AssignTeamID(APawn* InPawn);
-
 	#pragma region AI Team
-
 	FGenericTeamId TeamId;
 	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
 
@@ -50,10 +42,27 @@ private:
 
 	ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
-protected:
 	UFUNCTION(BlueprintCallable)
 	ETeamAttitude::Type	BP_GetTeamAttitudeTowards(const AActor* Other);
+
+	void AssignTeamID(APawn* InPawn);
+
 	#pragma endregion
 
+	#pragma region Stimulus
 
+	UPROPERTY(BlueprintReadOnly)
+	TMap<AActor*, FAIStimulusEntry> StimuliList;
+
+	UFUNCTION()
+	virtual void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnActorPerceptionUpdatedEvent(AActor* Actor, FAIStimulusEntry Stimulus);
+		
+	#pragma endregion
+
+#pragma endregion
+
+	void OnPossess(APawn* InPawn) override;
 };

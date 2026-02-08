@@ -5,7 +5,7 @@
 
 void UGlobalSubsystem::GetDebugModes(bool& ScreenMessages, bool& LogMessages, bool& LineTraces)
 {
-	ScreenMessages = (EDebugMode::ScreenMessages & DebugState.DebugMode) > 0;
-	LogMessages = (EDebugMode::LogMessages & DebugState.DebugMode) > 0;
-	LineTraces = (EDebugMode::LineTraces & DebugState.DebugMode) > 0;
+	ScreenMessages = (static_cast<uint8>(EDebugMode::ScreenMessages) & static_cast<uint8>(DebugState.DebugMode)) > 0;
+	LogMessages = (static_cast<uint8>(EDebugMode::LogMessages) & static_cast<uint8>(DebugState.DebugMode)) > 0;
+	LineTraces = (static_cast<uint8>(EDebugMode::LineTraces) & static_cast<uint8>(DebugState.DebugMode)) > 0;
 }

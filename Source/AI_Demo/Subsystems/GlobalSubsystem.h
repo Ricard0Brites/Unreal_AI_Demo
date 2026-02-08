@@ -9,14 +9,14 @@
 
 #pragma region Debug
 UENUM(Blueprintable, BlueprintType, meta = (Bitflags))
-enum EDebugSystems : uint8
+enum class EDebugSystems : uint8
 {
 	None = 0,
 	Interaction = 1,
 }; ENUM_CLASS_FLAGS(EDebugSystems)
 
 UENUM(Blueprintable, BlueprintType, meta = (Bitflags))
-enum EDebugMode : uint8
+enum class EDebugMode : uint8
 {
 	Disabled,
 	ScreenMessages,
@@ -29,10 +29,10 @@ struct FDebugPair
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Bitmask))
-	TEnumAsByte<EDebugSystems> SystemsToDebug = TEnumAsByte<EDebugSystems>(EDebugSystems::None);
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Bitmask))
-	TEnumAsByte<EDebugMode> DebugMode = TEnumAsByte<EDebugMode>(EDebugMode::Disabled);
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = "/Script/AIDemo.EDebugSystems"))
+	EDebugSystems SystemsToDebug;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = "/Script/AIDemo.EDebugMode"))
+	EDebugMode DebugMode;
 };
 
 #pragma endregion
@@ -44,7 +44,7 @@ class AI_DEMO_API UGlobalSubsystem : public UGameInstanceSubsystem
 	
 public:
 	UFUNCTION(BlueprintPure)
-	bool IsDebugEnabled(EDebugSystems System) { return (System & DebugState.SystemsToDebug) > 0; }
+	bool IsDebugEnabled(EDebugSystems System) { return (static_cast<uint8>(DebugState.SystemsToDebug) & static_cast<uint8>(System)) != 0; }
 
 	UFUNCTION(BlueprintPure)
 	void GetDebugModes(bool &ScreenMessages, bool &LogMessages, bool &LineTraces);

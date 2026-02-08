@@ -9,6 +9,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Subsystems/AIDemo_AISubsystem.h"
 #include "GameFramework/Pawn.h"
+#include "Perception/AIPerceptionSystem.h"
+#include "Perception/AISense_Touch.h"
 
 AAI_Demo_AIControllerBase::AAI_Demo_AIControllerBase() : TeamId((uint8)0)
 {
@@ -35,7 +37,7 @@ void AAI_Demo_AIControllerBase::OnPossess(APawn* InPawn)
 void AAI_Demo_AIControllerBase::SetupPreceptionComponent()
 {
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AI Perception Component"));
-	AIPerceptionComp->OnPerceptionUpdated.AddDynamic(this, &AAI_Demo_AIControllerBase::OnPerceptionUpdated);
+	AIPerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &AAI_Demo_AIControllerBase::OnTargetPerceptionUpdated);
 }
 
 void AAI_Demo_AIControllerBase::SetupPerceptionSenses()
@@ -75,10 +77,6 @@ void AAI_Demo_AIControllerBase::SetupPerceptionSenses()
 	AIPerceptionComp->SetDominantSense(UAISenseConfig_Sight::StaticClass());
 }
 
-void AAI_Demo_AIControllerBase::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
-{
-}
-
 void AAI_Demo_AIControllerBase::AssignTeamID(APawn* InPawn)
 {
 	if (IGenericTeamAgentInterface* TeamInterface = Cast< IGenericTeamAgentInterface>(InPawn))
@@ -86,6 +84,35 @@ void AAI_Demo_AIControllerBase::AssignTeamID(APawn* InPawn)
 		UAIDemo_AISubsystem* AISubSys = GetWorld()->GetSubsystemChecked<UAIDemo_AISubsystem>();
 		TeamInterface->SetGenericTeamId(AISubSys->AITeamID);
 	}
+}
+
+void AAI_Demo_AIControllerBase::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	TSubclassOf<UAISense> Res = UAIPerceptionSystem::GetSenseClassForStimulus(Actor, Stimulus);
+	EAIStimulusType Type = EAIStimulusType::None;
+
+	const UClass* Cls = Res.Get();
+
+	struct FEntry { const UClass* Class; EAIStimulusType Type; };
+
+	static const FEntry Table[] = {
+		{ UAISense_Sight::StaticClass(),   EAIStimulusType::Sight },
+		{ UAISense_Hearing::StaticClass(), EAIStimulusType::Hearing },
+		{ UAISense_Damage::StaticClass(),  EAIStimulusType::Damage },
+		{ UAISense_Touch::StaticClass(),   EAIStimulusType::Touch }
+	};
+
+	for (const FEntry& E : Table)
+	{
+		if (Cls->IsChildOf(E.Class))
+		{
+			Type = E.Type;
+		}
+	}
+	FAIStimulusEntry Stim(Stimulus, Type);
+	StimuliList.Add(Actor, Stim);
+
+	OnActorPerceptionUpdatedEvent(Actor, Stim);
 }
 
 void AAI_Demo_AIControllerBase::SetGenericTeamId(const FGenericTeamId& InTeamID)
