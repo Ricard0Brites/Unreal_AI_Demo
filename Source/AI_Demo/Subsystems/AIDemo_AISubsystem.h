@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "GenericTeamAgentInterface.h"
 #include "AIDemo_AISubsystem.generated.h"
 
 class AAIPath;
-struct FGenericTeamId;
 
 UCLASS()
 class AI_DEMO_API UAIDemo_AISubsystem : public UWorldSubsystem
@@ -15,16 +15,14 @@ class AI_DEMO_API UAIDemo_AISubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 	
 public:
+	UAIDemo_AISubsystem();
+
 	UPROPERTY(BlueprintReadOnly)
 	TArray<AAIPath*> AIPaths;
 
 	UFUNCTION(BlueprintCallable)
 	AAIPath* GetClosestPathToLocation(FVector Location);
 
-
-	const FGenericTeamId& GetAITeamID();
-
-private:
-	FGenericTeamId AITeamId; // Single Team - All AI is pooled as friendly towards each other
-	
+	FGenericTeamId AITeamID; // All AI in one team
 };
+ 

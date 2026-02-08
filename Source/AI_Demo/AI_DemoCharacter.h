@@ -16,7 +16,7 @@ class UAIPerceptionStimuliSourceComponent;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(abstract)
-class AAI_DemoCharacter : public ACharacter, public IGenericTeamAgentInterface
+class AAI_DemoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -99,14 +99,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UAIPerceptionStimuliSourceComponent* AIPerceptionSource;
-private:
-	void SetGenericTeamId(const FGenericTeamId& TeamID) override;
-
-
-	FGenericTeamId GetGenericTeamId() const override;
-
-
-	ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 };
 

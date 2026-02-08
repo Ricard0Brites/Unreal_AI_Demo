@@ -146,18 +146,3 @@ void AAI_DemoCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
-
-void AAI_DemoCharacter::SetGenericTeamId(const FGenericTeamId& TeamID)
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
-
-FGenericTeamId AAI_DemoCharacter::GetGenericTeamId() const
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
-
-ETeamAttitude::Type AAI_DemoCharacter::GetTeamAttitudeTowards(const AActor& Other) const
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}

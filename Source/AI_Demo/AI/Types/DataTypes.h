@@ -5,6 +5,5 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "GenericTeamAgentInterface.h"
-#include "DataTypes.generated.h"
-
+//#include "DataTypes.generated.h"
 

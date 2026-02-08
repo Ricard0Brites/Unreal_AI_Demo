@@ -7,8 +7,10 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Subsystems/AIDemo_AISubsystem.h"
+#include "GameFramework/Pawn.h"
 
-AAI_Demo_AIControllerBase::AAI_Demo_AIControllerBase()
+AAI_Demo_AIControllerBase::AAI_Demo_AIControllerBase() : TeamId((uint8)0)
 {
 	SetupPreceptionComponent();
 	SetupPerceptionSenses();
@@ -22,6 +24,12 @@ void AAI_Demo_AIControllerBase::Tick(float DeltaTime)
 void AAI_Demo_AIControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AAI_Demo_AIControllerBase::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	AssignTeamID(InPawn);
 }
 
 void AAI_Demo_AIControllerBase::SetupPreceptionComponent()
@@ -69,11 +77,38 @@ void AAI_Demo_AIControllerBase::SetupPerceptionSenses()
 
 void AAI_Demo_AIControllerBase::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
-	FString Res;
-	for (AActor* A : UpdatedActors)
+}
+
+void AAI_Demo_AIControllerBase::AssignTeamID(APawn* InPawn)
+{
+	if (IGenericTeamAgentInterface* TeamInterface = Cast< IGenericTeamAgentInterface>(InPawn))
 	{
-		Res += "\n I See: ";
-		Res += A->GetHumanReadableName();
+		UAIDemo_AISubsystem* AISubSys = GetWorld()->GetSubsystemChecked<UAIDemo_AISubsystem>();
+		TeamInterface->SetGenericTeamId(AISubSys->AITeamID);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, Res);
+}
+
+void AAI_Demo_AIControllerBase::SetGenericTeamId(const FGenericTeamId& InTeamID)
+{
+	TeamId = InTeamID;
+}
+
+FGenericTeamId AAI_Demo_AIControllerBase::GetGenericTeamId() const
+{
+	return TeamId;
+}
+
+ETeamAttitude::Type AAI_Demo_AIControllerBase::GetTeamAttitudeTowards(const AActor& Other) const
+{
+
+	if(const APawn* CharacterRef = Cast<APawn>(&Other))
+		if (const AAI_Demo_AIControllerBase* C = Cast<AAI_Demo_AIControllerBase>(CharacterRef->GetController()))
+			return  C->GetGenericTeamId() == TeamId ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
+
+	return ETeamAttitude::Hostile;
+}
+
+ETeamAttitude::Type AAI_Demo_AIControllerBase::BP_GetTeamAttitudeTowards(const AActor* Other)
+{
+	return GetTeamAttitudeTowards(*Other);
 }

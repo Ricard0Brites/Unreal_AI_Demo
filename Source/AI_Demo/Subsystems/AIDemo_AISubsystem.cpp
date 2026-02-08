@@ -6,6 +6,10 @@
 #include "Components/SplineComponent.h"
 #include "GenericTeamAgentInterface.h"
 
+UAIDemo_AISubsystem::UAIDemo_AISubsystem() : AITeamID((uint8)1)
+{
+}
+
 AAIPath* UAIDemo_AISubsystem::GetClosestPathToLocation(FVector Location)
 {
 	float MinDist = (AIPaths[0]->GetSpline()->FindLocationClosestToWorldLocation(Location, ESplineCoordinateSpace::World) - Location).Length();
@@ -23,9 +27,4 @@ AAIPath* UAIDemo_AISubsystem::GetClosestPathToLocation(FVector Location)
 		ClosestPath = P;
 	}
 	return ClosestPath;
-}
-
-const FGenericTeamId& UAIDemo_AISubsystem::GetAITeamID()
-{
-	return AITeamId;
 }
