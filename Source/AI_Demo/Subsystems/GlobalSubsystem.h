@@ -11,8 +11,9 @@
 UENUM(Blueprintable, BlueprintType, meta = (Bitflags))
 enum class EDebugSystems : uint8
 {
-	None = 0,
+	Disabled = 0,
 	Interaction = 1,
+	Weapon = 1 << 1,
 }; ENUM_CLASS_FLAGS(EDebugSystems)
 
 UENUM(Blueprintable, BlueprintType, meta = (Bitflags))
