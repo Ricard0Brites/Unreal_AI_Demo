@@ -6,11 +6,12 @@
 #include "AIController.h"
 #include "GenericTeamAgentInterface.h"
 #include "Perception/AIPerceptionTypes.h"
-#include "AI/Types/DataTypes.h"
+#include "DataTypes.h"
 #include "AI_Demo_AIControllerBase.generated.h"
 
 class UAISenseConfig;
 class UAIPerceptionComponent;
+class UBehaviorTree;
 
 
 UCLASS()
@@ -24,6 +25,7 @@ public:
 
 protected:
 	void BeginPlay() override;
+	void OnPossess(APawn* InPawn) override;
 
 	#pragma region AI Perception
 
@@ -45,6 +47,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	ETeamAttitude::Type	BP_GetTeamAttitudeTowards(const AActor* Other);
 
+	
 	void AssignTeamID(APawn* InPawn);
 
 	#pragma endregion
@@ -59,10 +62,23 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnActorPerceptionUpdatedEvent(AActor* Actor, FAIStimulusEntry Stimulus);
-		
-	#pragma endregion
 
+public:
+	const TMap<AActor*, FAIStimulusEntry>& GetStimuliList() { return StimuliList; }		
+	#pragma endregion
 #pragma endregion
 
-	void OnPossess(APawn* InPawn) override;
+protected:
+	
+	#pragma region Behavior Tree
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Behavior Tree")
+	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Behavior Tree")
+	FName CurrentPatrolStateBlackBoardKey = "PatrolState";
+public:
+	FName GetPatrolStateBlackBoardKey() {return CurrentPatrolStateBlackBoardKey;}
+	#pragma endregion
+
 };

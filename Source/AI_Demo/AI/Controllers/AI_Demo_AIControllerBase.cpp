@@ -32,6 +32,9 @@ void AAI_Demo_AIControllerBase::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	AssignTeamID(InPawn);
+
+	if(BehaviorTree)
+		RunBehaviorTree(BehaviorTree);
 }
 
 void AAI_Demo_AIControllerBase::SetupPreceptionComponent()
