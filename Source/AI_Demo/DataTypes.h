@@ -95,9 +95,10 @@ enum class ECombatState : uint8
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EPatrolStateTransitionRule : uint8
 {
-	Block = 0 UMETA(DisplayName = "Block"),
-	Next = 1 UMETA(DisplayName = "Next"),
-	Previous = 1 << 1 UMETA(DisplayName = "Previous")
+	None = 0,
+	Block = 1 << 0,
+	Next = 1 << 1,
+	Previous = 1 << 2
 }; ENUM_CLASS_FLAGS(EPatrolStateTransitionRule)
 
 // The time it takes to wind (reads as rewind) up or down the state 
@@ -108,16 +109,22 @@ struct FPatrolStateWindTimes
 
     FPatrolStateWindTimes() = default;
 
-    FPatrolStateWindTimes(const EPatrolStateTransitionRule & InTransitionRules, float InWindUpTime, float InWindDownTime);
+    FPatrolStateWindTimes(int32 InTransitionRules, float InWindUpTime, float InWindDownTime);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (Bitmask, BitmaskEnum = "/Script/AI_Demo.EPatrolStateTransitionRule"))
-	EPatrolStateTransitionRule TransitionRules = (EPatrolStateTransitionRule::Next | EPatrolStateTransitionRule::Previous); // Can state be set to previous after a certain time?
+	int32 TransitionRules = 1; // Can state be set to previous after a certain time?
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
     float WindUpTime = 5.f; // Time until we progress to the next state
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
     float WindDownTime = 5.f; // Time until we regress to the previous state
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool IsCustomState = false; // Defines if this state should be "ignored" to use another states times
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EAIPatrolState OverrideState = EAIPatrolState::None; // Defines which state to get the times from
 };
 
 USTRUCT(BlueprintType, Blueprintable)

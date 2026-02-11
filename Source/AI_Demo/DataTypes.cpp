@@ -5,7 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AI/Controllers/AI_Demo_AIControllerBase.h"
 
-FPatrolStateWindTimes::FPatrolStateWindTimes(const EPatrolStateTransitionRule& InTransitionRules, float InWindUpTime, float InWindDownTime) :
+FPatrolStateWindTimes::FPatrolStateWindTimes(int32 InTransitionRules, float InWindUpTime, float InWindDownTime) :
     TransitionRules(InTransitionRules),
     WindUpTime(InWindUpTime), 
     WindDownTime(InWindDownTime)

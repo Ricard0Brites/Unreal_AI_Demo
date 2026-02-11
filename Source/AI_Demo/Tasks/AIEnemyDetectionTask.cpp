@@ -295,10 +295,24 @@ float UAIEnemyDetectionTask::GetCurrentWindDownTime()
 	EAIPatrolState CurrentPatrolState = PatrolStateRulesInternal.CurrentPatrolState;
 	if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentPatrolState))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UAIEnemyDetectionTask: CurrentPatrolState not found in StateChangeData. Returning 0.f for WindDownTime."));
+		UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: CurrentPatrolState not found in StateChangeData. Returning 0.f for WindDownTime."));
 		return 0.f;
 	}
-	return PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].WindDownTime;
+	FPatrolStateWindTimes& CurrentData = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState];
+
+	// If its a custom state return the wind times of the entry with Key: FPatrolStateWindTimes::OverrideState
+	if (CurrentData.IsCustomState)
+	{
+		if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentData.OverrideState))
+		{
+			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: OverrideData State not found in StateChangeData. Returning 0.f for WindDownTime."));
+			return 0.f;
+		}
+
+		return  PatrolStateRulesInternal.StateChangeData[CurrentData.OverrideState].WindDownTime;
+	}
+
+	return CurrentData.WindDownTime;
 }
 
 void UAIEnemyDetectionTask::StartWindDown()
@@ -344,24 +358,50 @@ void UAIEnemyDetectionTask::OnWindDownFinished()
 bool UAIEnemyDetectionTask::CanRegressOneState()
 {
 	EAIPatrolState CurrentPatrolState = PatrolStateRulesInternal.CurrentPatrolState;
+	
+	if (PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].IsCustomState)
+	{
+		EAIPatrolState NewState = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].OverrideState;
+		if (!PatrolStateRulesInternal.StateChangeData.Contains(NewState))
+		{
+			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: The override state is not present in the detection rules, please add it. "));
+			return 0.f;
+		}
+		CurrentPatrolState = NewState;
+	}
+
 	if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentPatrolState))
 		return false;
-	return (uint8)(PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].TransitionRules & EPatrolStateTransitionRule::Previous) != 0;
+	return (uint8)(PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].TransitionRules & (uint8)EPatrolStateTransitionRule::Previous) != 0;
 }
 
 bool UAIEnemyDetectionTask::CanForwardOneState()
 {
 	EAIPatrolState CurrentPatrolState = PatrolStateRulesInternal.CurrentPatrolState;
+	
+	if (PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].IsCustomState)
+	{
+		EAIPatrolState NewState = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].OverrideState;
+		if (!PatrolStateRulesInternal.StateChangeData.Contains(NewState))
+		{
+			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: The override state is not present in the detection rules, please add it. "));
+			return 0.f;
+		}
+		CurrentPatrolState = NewState;
+	}
+
 	if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentPatrolState))
 		return false;
-	return (uint8)(PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].TransitionRules & EPatrolStateTransitionRule::Next) != 0;
+	return (uint8)(PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].TransitionRules & (uint8)EPatrolStateTransitionRule::Next) != 0;
 }
 
 EAIPatrolState UAIEnemyDetectionTask::GetNextState()
 {
 	TArray<EAIPatrolState> States;
 	PatrolStateRulesInternal.StateChangeData.GetKeys(States);
-	States.Sort([](const EAIPatrolState& A, const EAIPatrolState& B) {
+	States = States.FilterByPredicate([&](EAIPatrolState State) { return !(PatrolStateRulesInternal.StateChangeData[State].IsCustomState); });
+	States.Sort([](const EAIPatrolState& A, const EAIPatrolState& B) 
+	{
 		return (uint8)A < (uint8)B;
 	});
 
@@ -378,6 +418,10 @@ EAIPatrolState UAIEnemyDetectionTask::GetPreviousState()
 {
 	TArray<EAIPatrolState> States;
 	PatrolStateRulesInternal.StateChangeData.GetKeys(States);
+
+	// Remove All Custom States from the Array. These are supposed to be manually set.
+	States = States.FilterByPredicate([&](EAIPatrolState State) { return !(PatrolStateRulesInternal.StateChangeData[State].IsCustomState); });
+
 	States.Sort([](const EAIPatrolState& A, const EAIPatrolState& B) {
 		return (uint8)A < (uint8)B;
 	});

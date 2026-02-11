@@ -85,8 +85,11 @@ protected:
 
 	// ----------- Business Logic
 
-private:
+protected:
+	UPROPERTY(BlueprintReadOnly)
 	TSet<AActor*> ActiveActors = {};
+
+private:
 	float ElapsedTime = 0;
 	float Alpha = 0;
 	bool HasStartedWindDown = false;

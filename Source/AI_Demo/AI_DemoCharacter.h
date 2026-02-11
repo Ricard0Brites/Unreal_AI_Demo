@@ -83,7 +83,7 @@ public:
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoJumpEnd();
+	virtual void DoJumpEnd();	
 
 public:
 
@@ -99,6 +99,21 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UAIPerceptionStimuliSourceComponent* AIPerceptionSource;
+
+#pragma region States
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	bool bIsWalking = false;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	bool bIsInvestigating = false;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	float WalkSpeedAlpha = 0.3f;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	float MaxSpeedCache;
+#pragma endregion
 
 };
 
