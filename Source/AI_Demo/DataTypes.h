@@ -74,9 +74,15 @@ enum class EAIPatrolState : uint8
 	None UMETA(Hidden),
 	Patrolling UMETA(DisplayName = "Patrolling"),
 	Suspicious UMETA(DisplayName = "Suspicious"),
+	Combat UMETA(DisplayName = "Combat")
+};
+
+UENUM(BlueprintType)
+enum class EAIActions : uint8
+{
+	None UMETA(DisplayName = "None"),
 	Investigating UMETA(DisplayName = "Investigating"),
 	Chasing UMETA(DisplayName = "Chasing"),
-	Combat UMETA(DisplayName = "Combat")
 };
 
 // AI Combat
@@ -119,12 +125,6 @@ struct FPatrolStateWindTimes
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
     float WindDownTime = 5.f; // Time until we regress to the previous state
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool IsCustomState = false; // Defines if this state should be "ignored" to use another states times
-
-    UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	EAIPatrolState OverrideState = EAIPatrolState::None; // Defines which state to get the times from
 };
 
 USTRUCT(BlueprintType, Blueprintable)

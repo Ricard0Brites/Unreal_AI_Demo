@@ -12,12 +12,13 @@ class UAIPerceptionComponent;
 class AAI_Demo_AIControllerBase;
 
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class AI_DEMO_API UAIEnemyDetectionTask : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
-	
+
 public:
+	UAIEnemyDetectionTask();
 	#pragma region Async Task
 protected:
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "AI Async Tasks", WorldContext = "InWorldContextObject"))
@@ -122,7 +123,17 @@ private:
 	void StartWindDown();
 	void AbortWindDown();
 	void OnWindDownFinished();
-	FTimerHandle WindDownTimerHandle;
+
+	UFUNCTION(BlueprintCallable)
+	void PauseWindDown();
+	UFUNCTION(BlueprintCallable)
+	void ResumeWindDown();
+
+	void WindDownTick();
+
+	FTimerHandle WindDownTickTimerHandle;
+	float CurrentWindDownTimeRemaining = -1.f;
+	bool bIsWindDownPaused = false;
 	
 	//Values
 	void UpdateAlpha();

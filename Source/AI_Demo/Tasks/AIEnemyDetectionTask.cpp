@@ -9,6 +9,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 
 
+
+UAIEnemyDetectionTask::UAIEnemyDetectionTask()
+{
+	bIsWindDownPaused = false;
+}
+
 UAIEnemyDetectionTask* UAIEnemyDetectionTask::StartAIEnemyDetectionTask(
 	UObject*InWorldContextObject,
 	float InTickRatePerSecond,
@@ -52,6 +58,7 @@ void UAIEnemyDetectionTask::Activate()
 void UAIEnemyDetectionTask::EndTask()
 {
 	StopTick();
+	AbortWindDown();
 	SetReadyToDestroy();
 }
 
@@ -207,6 +214,10 @@ void UAIEnemyDetectionTask::OnTargetUpdated(AActor* InActor, FAIStimulus InStimu
 
 	if (IsEnemyDetected())
 	{
+		if (HasStartedWindDown)
+		{
+			AbortWindDown();
+		}
 		StartTick();
 	}
 }
@@ -300,18 +311,6 @@ float UAIEnemyDetectionTask::GetCurrentWindDownTime()
 	}
 	FPatrolStateWindTimes& CurrentData = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState];
 
-	// If its a custom state return the wind times of the entry with Key: FPatrolStateWindTimes::OverrideState
-	if (CurrentData.IsCustomState)
-	{
-		if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentData.OverrideState))
-		{
-			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: OverrideData State not found in StateChangeData. Returning 0.f for WindDownTime."));
-			return 0.f;
-		}
-
-		return  PatrolStateRulesInternal.StateChangeData[CurrentData.OverrideState].WindDownTime;
-	}
-
 	return CurrentData.WindDownTime;
 }
 
@@ -319,17 +318,22 @@ void UAIEnemyDetectionTask::StartWindDown()
 {
 	if (HasStartedWindDown)
 		return;
-	WorldRefInternal->GetTimerManager().SetTimer(WindDownTimerHandle, this, &UAIEnemyDetectionTask::OnWindDownFinished, GetCurrentWindDownTime(), false);
+
 	HasStartedWindDown = true;
+	CurrentWindDownTimeRemaining = GetCurrentWindDownTime();
+
+	// Use a looping timer for the wind-down tick
+	WorldRefInternal->GetTimerManager().SetTimer(WindDownTickTimerHandle, this, &UAIEnemyDetectionTask::WindDownTick, 1.0f / TickRatePerSecondInternal, true);
 }
 
 void UAIEnemyDetectionTask::AbortWindDown()
 {
-	if (!WindDownTimerHandle.IsValid())
+	if (!WindDownTickTimerHandle.IsValid())
 		return;
 
-	WorldRefInternal->GetTimerManager().ClearTimer(WindDownTimerHandle);
+	WorldRefInternal->GetTimerManager().ClearTimer(WindDownTickTimerHandle);
 	HasStartedWindDown = false;
+	CurrentWindDownTimeRemaining = -1.f;
 }
 
 void UAIEnemyDetectionTask::OnWindDownFinished()
@@ -355,40 +359,54 @@ void UAIEnemyDetectionTask::OnWindDownFinished()
 	}
 }
 
+void UAIEnemyDetectionTask::PauseWindDown()
+{
+	bIsWindDownPaused = true;
+
+	if(WindDownTickTimerHandle.IsValid())
+		return;
+
+	WorldRefInternal->GetTimerManager().PauseTimer(WindDownTickTimerHandle);
+}
+
+void UAIEnemyDetectionTask::ResumeWindDown()
+{
+	bIsWindDownPaused = false;
+	
+	if(!WindDownTickTimerHandle.IsValid())
+		return;
+
+	WorldRefInternal->GetTimerManager().UnPauseTimer(WindDownTickTimerHandle);
+}
+
+void UAIEnemyDetectionTask::WindDownTick()
+{
+	if (bIsWindDownPaused || !WorldRefInternal)
+		return;
+
+	const float Delta = 1.f / TickRatePerSecondInternal;
+	CurrentWindDownTimeRemaining -= Delta;
+
+	if (CurrentWindDownTimeRemaining <= 0.f)
+	{
+		WorldRefInternal->GetTimerManager().ClearTimer(WindDownTickTimerHandle);
+		OnWindDownFinished();
+	}
+}
+
 bool UAIEnemyDetectionTask::CanRegressOneState()
 {
 	EAIPatrolState CurrentPatrolState = PatrolStateRulesInternal.CurrentPatrolState;
-	
-	if (PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].IsCustomState)
-	{
-		EAIPatrolState NewState = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].OverrideState;
-		if (!PatrolStateRulesInternal.StateChangeData.Contains(NewState))
-		{
-			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: The override state is not present in the detection rules, please add it. "));
-			return 0.f;
-		}
-		CurrentPatrolState = NewState;
-	}
 
 	if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentPatrolState))
 		return false;
+
 	return (uint8)(PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].TransitionRules & (uint8)EPatrolStateTransitionRule::Previous) != 0;
 }
 
 bool UAIEnemyDetectionTask::CanForwardOneState()
 {
 	EAIPatrolState CurrentPatrolState = PatrolStateRulesInternal.CurrentPatrolState;
-	
-	if (PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].IsCustomState)
-	{
-		EAIPatrolState NewState = PatrolStateRulesInternal.StateChangeData[CurrentPatrolState].OverrideState;
-		if (!PatrolStateRulesInternal.StateChangeData.Contains(NewState))
-		{
-			UE_LOG(LogTemp, Error, TEXT("UAIEnemyDetectionTask: The override state is not present in the detection rules, please add it. "));
-			return 0.f;
-		}
-		CurrentPatrolState = NewState;
-	}
 
 	if (!PatrolStateRulesInternal.StateChangeData.Contains(CurrentPatrolState))
 		return false;
@@ -399,11 +417,6 @@ EAIPatrolState UAIEnemyDetectionTask::GetNextState()
 {
 	TArray<EAIPatrolState> States;
 	PatrolStateRulesInternal.StateChangeData.GetKeys(States);
-	States = States.FilterByPredicate([&](EAIPatrolState State) { return !(PatrolStateRulesInternal.StateChangeData[State].IsCustomState); });
-	States.Sort([](const EAIPatrolState& A, const EAIPatrolState& B) 
-	{
-		return (uint8)A < (uint8)B;
-	});
 
 	const int32 CurrentIndex = States.Find(PatrolStateRulesInternal.CurrentPatrolState);
 	if (CurrentIndex != INDEX_NONE && CurrentIndex + 1 < States.Num())
@@ -418,13 +431,6 @@ EAIPatrolState UAIEnemyDetectionTask::GetPreviousState()
 {
 	TArray<EAIPatrolState> States;
 	PatrolStateRulesInternal.StateChangeData.GetKeys(States);
-
-	// Remove All Custom States from the Array. These are supposed to be manually set.
-	States = States.FilterByPredicate([&](EAIPatrolState State) { return !(PatrolStateRulesInternal.StateChangeData[State].IsCustomState); });
-
-	States.Sort([](const EAIPatrolState& A, const EAIPatrolState& B) {
-		return (uint8)A < (uint8)B;
-	});
 
 	const int32 CurrentIndex = States.Find(PatrolStateRulesInternal.CurrentPatrolState);
 	if (CurrentIndex != INDEX_NONE && CurrentIndex - 1 >= 0)

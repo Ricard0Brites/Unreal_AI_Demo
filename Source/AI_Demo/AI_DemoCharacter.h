@@ -106,9 +106,6 @@ public:
 	bool bIsWalking = false;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	bool bIsInvestigating = false;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	float WalkSpeedAlpha = 0.3f;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
