@@ -11,6 +11,8 @@
 #include "GameFramework/Pawn.h"
 #include "Perception/AIPerceptionSystem.h"
 #include "Perception/AISense_Touch.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AAI_Demo_AIControllerBase::AAI_Demo_AIControllerBase() : TeamId((uint8)0)
 {
@@ -33,8 +35,12 @@ void AAI_Demo_AIControllerBase::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 	AssignTeamID(InPawn);
 
-	if(BehaviorTree)
+	if (BehaviorTree)
+	{
+		UBlackboardComponent* BlackboardComp;
+		UseBlackboard(BehaviorTree->BlackboardAsset, BlackboardComp); // force BB init
 		RunBehaviorTree(BehaviorTree);
+	}
 }
 
 void AAI_Demo_AIControllerBase::SetupPreceptionComponent()
