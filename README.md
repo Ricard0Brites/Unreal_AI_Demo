@@ -17,7 +17,7 @@ This project showcases various AI behaviors implemented in Unreal Engine. Each s
 ![Path Following](ReadMeSource/PathFollowing.gif)
 
 ## Running to Cover
-![Running to Cover](ReadMeSource/Running To Cover.gif)
+![Running to Cover](ReadMeSource/RunningToCover.gif)
 
 ## Bullet Prediction
-![Bullet Prediction](ReadMeSource/Bullet Prediction.gif)
+![Bullet Prediction](ReadMeSource/BulletPrediction.gif)
