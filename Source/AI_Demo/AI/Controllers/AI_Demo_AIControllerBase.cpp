@@ -61,8 +61,8 @@ void AAI_Demo_AIControllerBase::SetupPerceptionSenses()
 		SightConfig->LoseSightRadius = 1500.0f;
 		SightConfig->PeripheralVisionAngleDegrees = 70.0f; 
 		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-		SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
+		SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
 		AIPerceptionComp->ConfigureSense(*SightConfig);
 	}
 
@@ -72,8 +72,8 @@ void AAI_Demo_AIControllerBase::SetupPerceptionSenses()
 	{
 		HearingConfig->HearingRange = 1100.0f;
 		HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-		HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
-		HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
+		HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
 		AIPerceptionComp->ConfigureSense(*HearingConfig);
 	}
 
