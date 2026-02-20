@@ -3,20 +3,28 @@
 This project showcases various AI behaviors implemented in Unreal Engine. Each section includes a short video demonstrating the behavior in action.
 
 ## Enemy Detection
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Q2mLoFrsfWo?autoplay=1&loop=1&playlist=Q2mLoFrsfWo&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2zAUdCHQC-w?autoplay=1&loop=1&playlist=2zAUdCHQC-w&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Enemy Detection](ReadMeSource/EnemyDetection.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=Q2mLoFrsfWo)
+
+![Enemy Detection 2](ReadMeSource/EnemyDetection2.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=2zAUdCHQC-w)
 
 ## Sound Detection
-<iframe width="560" height="315" src="https://www.youtube.com/embed/3Zn8wdzmCxY?autoplay=1&loop=1&playlist=3Zn8wdzmCxY&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Sound Detection](ReadMeSource/SoundDetection.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=3Zn8wdzmCxY)
 
 ## Damage Detection
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2yGiTD78Xg4?autoplay=1&loop=1&playlist=2yGiTD78Xg4&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Damage Detection](ReadMeSource/DamageDetection.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=2yGiTD78Xg4)
 
 ## Pathing
-<iframe width="560" height="315" src="https://www.youtube.com/embed/iIQroXxRa4E?autoplay=1&loop=1&playlist=iIQroXxRa4E&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Path Following](ReadMeSource/PathFollowing.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=iIQroXxRa4E)
 
 ## Running to Cover
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bRB4NXyM638?autoplay=1&loop=1&playlist=bRB4NXyM638&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Running to Cover](ReadMeSource/Running To Cover.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=bRB4NXyM638)
 
 ## Bullet Prediction
-<iframe width="560" height="315" src="https://www.youtube.com/embed/MUkHkRt7zvE?autoplay=1&loop=1&playlist=MUkHkRt7zvE&mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![Bullet Prediction](ReadMeSource/Bullet Prediction.gif)
+[Watch on YouTube](https://www.youtube.com/watch?v=MUkHkRt7zvE)
